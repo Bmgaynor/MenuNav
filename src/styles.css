@@ -1,0 +1,27 @@
+html,
+body,
+#root,
+.App {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.App {
+  display: grid;
+  grid-template-columns: 20% 80%;
+}
+
+.Content {
+  overflow: scroll;
+  height: 100vh;
+  scroll-behavior: smooth;
+}
+
+.Section {
+  height: 1000px;
+  border: solid black 2px;
+}
