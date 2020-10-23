@@ -7,13 +7,16 @@ export const MenuContext = React.createContext({
   setSectionInView: function (sectionId: string, inView: boolean) {}
 });
 
-export const useIsSectionActive = (id: string) => {
+export const useActiveSectionId = () => {
   const { sections } = React.useContext(MenuContext);
-
   const activeSection = Object.keys(sections).find((sectionId) => {
     return sections[sectionId];
   });
+  return activeSection;
+};
 
+export const useIsSectionActive = (id: string) => {
+  const activeSection = useActiveSectionId();
   return id === activeSection;
 };
 
@@ -21,13 +24,9 @@ export const useSetSectionInView = (sectionId: string) => {
   const { setSectionInView } = React.useContext(MenuContext);
   React.useEffect(() => {
     // when component is unmounted set it to false
-    return () => {
-      setSectionInView(sectionId, false);
-    };
+    return () => setSectionInView(sectionId, false);
   }, []);
-  return (inView) => {
-    setSectionInView(sectionId, inView);
-  };
+  return (inView) => setSectionInView(sectionId, inView);
 };
 
 export const MenuWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -85,7 +84,7 @@ type SectionProps = {
   id: string;
 };
 
-export const Section = ({ id, children }: SectionProps) => {
+export const Section = ({ id, children, ...props }: SectionProps) => {
   console.log("rendering ", id);
   const { setSectionInView } = React.useContext(MenuContext);
   const isSectionActive = useIsSectionActive(id);
@@ -99,10 +98,11 @@ export const Section = ({ id, children }: SectionProps) => {
       className="Section"
       threshold={0}
       onChange={(inView, entry) => {
-        console.log(`${id} is ${inView ? "" : "not"} inView`);
+        console.debug(`${id} is ${inView ? "" : "not"} inView`);
         setSectionInView(id, inView);
       }}
       style={{ color: bgColor, margin: "1px 0" }}
+      {...props}
     >
       <h1>{id}</h1>
       {children}
