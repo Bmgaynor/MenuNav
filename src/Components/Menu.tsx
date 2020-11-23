@@ -4,14 +4,12 @@ import { InView } from "react-intersection-observer";
 export const MenuContext = React.createContext({
   sections: {},
   activeSection: "",
-  setSectionInView: function (sectionId: string, inView: boolean) {}
+  setSectionInView: function (sectionId: string, inView: boolean) {},
+  setActiveSection: function (sectionId: string) {}
 });
 
 export const useActiveSectionId = () => {
-  const { sections } = React.useContext(MenuContext);
-  const activeSection = Object.keys(sections).find((sectionId) => {
-    return sections[sectionId];
-  });
+  const { activeSection } = React.useContext(MenuContext);
   return activeSection;
 };
 
@@ -21,16 +19,20 @@ export const useIsSectionActive = (id: string) => {
 };
 
 export const useSetSectionInView = (sectionId: string) => {
-  const { setSectionInView } = React.useContext(MenuContext);
+  const { setSectionInView, setActiveSection } = React.useContext(MenuContext);
   React.useEffect(() => {
     // when component is unmounted set it to false
     return () => setSectionInView(sectionId, false);
   }, []);
-  return (inView) => setSectionInView(sectionId, inView);
+  return (inView) => {
+    setActiveSection(sectionId);
+    setSectionInView(sectionId, inView);
+  };
 };
 
 export const MenuWrapper = ({ children }: { children: React.ReactNode }) => {
   const [sections, setSections] = React.useState({});
+  const [activeSection, setActiveSection] = React.useState("");
 
   function setSectionInView(sectionId: string, inView: boolean) {
     setSections({
@@ -38,9 +40,10 @@ export const MenuWrapper = ({ children }: { children: React.ReactNode }) => {
       [sectionId]: inView
     });
   }
+
   return (
     <MenuContext.Provider
-      value={{ sections, setSectionInView, activeSection: "" }}
+      value={{ sections, setSectionInView, activeSection, setActiveSection }}
     >
       {children}
     </MenuContext.Provider>
@@ -85,8 +88,7 @@ type SectionProps = {
 };
 
 export const Section = ({ id, children, ...props }: SectionProps) => {
-  console.log("rendering ", id);
-  const { setSectionInView } = React.useContext(MenuContext);
+  const setSectionInView = useSetSectionInView(id);
   const isSectionActive = useIsSectionActive(id);
 
   const bgColor = isSectionActive ? "red" : "black";
@@ -99,7 +101,7 @@ export const Section = ({ id, children, ...props }: SectionProps) => {
       threshold={0}
       onChange={(inView, entry) => {
         console.debug(`${id} is ${inView ? "" : "not"} inView`);
-        setSectionInView(id, inView);
+        setSectionInView(inView);
       }}
       style={{ color: bgColor, margin: "1px 0" }}
       {...props}
